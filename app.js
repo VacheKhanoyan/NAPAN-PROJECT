@@ -6,9 +6,9 @@ const app = express();
 const Utility = require('./services/utility');
 const AppConstants = require('./settings/constants');
 const ChekAPIKey = require('./model/user');
-ChekAPIKey.isAutorisated = (rea,res,next) =>{
+/*ChekAPIKey.isAutorisated = (rea,res,next) =>{
   req.isAutorisated()?next():ChekAPIKey.generateAPIKey()
-} // I dont know is it near a true ??
+} // I dont know is it near a true ??*/
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({
   extended:true

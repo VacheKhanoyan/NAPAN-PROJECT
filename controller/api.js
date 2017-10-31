@@ -19,6 +19,7 @@ app.get('/api/users',(req, res) => {
             id: d._id,
             key: d.key,
             name: d.name,
+            password: d.password,
             age: d.age,
             email: d.email
           }
@@ -40,7 +41,7 @@ app.post('/api/users', (req, res) => {
     || password.length > AppConstants.PASSWORD_MAX_LENGTH) {
       return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.INVALID_PASSWORD_RANGE));
     }
-    password = crypto.createHash('sha1').update(password + 'key generator').digest('hex');
+    password = crypto.createHash('sha1').update(password + 'bootcamp').digest('hex');
     app.db.users.findOne({username:username}, (err, data) =>{
       if(data) {
         return res.send('user already exists.');
@@ -58,8 +59,7 @@ app.post('/api/users', (req, res) => {
               }
         }
       if(email){
-          console.log('email.validator = ' + EmailValidator.isEmail)
-          if(EmailValidator.isEmail == false){
+            if(EmailValidator.isEmail(email) == false){
             return res.send('invalid email');
           }
         }
@@ -77,30 +77,69 @@ app.post('/api/users', (req, res) => {
       })
     });
 });
-app.put('/api/users/:username', (req,res)=>{
-  let user = {
-    username: req.params.username,
-    //password: req.params.password
-  };
-  console.log(user)
-  app.db.users.update(user,{$set: {username:req.body.username}},(err,data)=>{
+app.put('/api/users/:id',(req,res) => {
+
+        app.db.users.find({_id: req.params.id },(err,data) => {
+           if(err) {
+              return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR));
+           }
+           let user = {
+             username : req.body.username,
+             password : req.body.password,
+             name : req.body.name,
+             age : req.body.age,
+             email : req.body.email
+           }
+           user.username ? user.username = user.username : user.username = data.username;
+           user.password ? user.password = user.password : user.password = data.password;
+           user.name ? user.name = user.name : user.name = data.name;
+           user.age ? user.age = user.age : user.age = data.age;
+           user.email ? user.email = user.email : user.email = data.email;
+           let uv_response = UserValidator.validateUsername(user.username);
+
+           if (uv_response != Utility.ErrorTypes.SUCCESS) {
+                return res.send(Utility.generateErrorMessage(uv_response));
+            }
+            let pass_response = UserValidator.validateUsername(user.password);
+            if (pass_response != Utility.ErrorTypes.SUCCESS) {
+                 return res.send(Utility.generateErrorMessage(pass_response));
+             }
+           user.password = crypto.createHash('sha1').update(user.password + 'bootcamp').digest('hex');
+           app.db.users.update({_id:req.params.id},{$set:{username: user.username,
+                                                          name : user.name,
+                                                          age : user.age,
+                                                          email : user.email,
+                                                          password : user.password }},(err,value) => {
+              if(err) {
+                return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_UPDATE_ERROR));
+              }
+              return res.send(value);
+           });
+        });
+     });
+/*app.put('/api/users/:id', (req,res)=>{
+let id = req.params.id;
+if(!id){
+  return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR))
+}
+    app.db.users.update({},{$set: {_id: id}},(err,data)=>{
     if(err){
       return res.send('error');
     }
     console.log(data)
     return res.send(data);
   });
-});
-
-app.delete('/api/users/:username', (req, res) => {
-   let user = {
-     username: req.params.username
-   }
-   app.db.users.remove(user, {username:req.body.username},(err, data) => {
-     if(err) {
-       res.send('Error Delete.');
-     }
-     return res.send(data);
-   });
- });
-}
+});*/
+app.delete('/api/users/:id',(req,res) => {
+        let id = req.params.id;
+        if(!id) {
+            return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR));
+        }
+        app.db.users.findOneAndRemove({_id:id} , (err,data)=> {
+           if(err) {
+              return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_DELETE_ERROR));
+           }
+           return res.send(data);
+        })
+    });
+  }
