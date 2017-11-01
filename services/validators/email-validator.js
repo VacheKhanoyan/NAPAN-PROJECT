@@ -6,8 +6,8 @@ class EmailValidator extends BaseValidator {
     return false;
   let emailRegExp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,6})+$/;
   if(emailRegExp.test(email))
-    return true;
     return false;
+    return true;
 }
 }
 module.exports = EmailValidator;

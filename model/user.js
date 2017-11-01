@@ -14,7 +14,7 @@ let UsersSchema = Schema ({
   key: {
     type: String,
     default: generateAPIKey,
-    isAutorisated: true
+    index: true
   },
   username: {
     type: String,
@@ -44,11 +44,11 @@ let UsersSchema = Schema ({
         type: String,
         default: null,
         minlength: AppConstants.NAME_MIN_LENGTH,
-        maxlength: AppConstants.NAME_MAX_LENGTH,
+        maxlength: AppConstants.NAME_MAX_LENGTH
     },
     role: {
       type: String,
-      enum:['user', 'admin'],
+      enum:['optional','user', 'admin'],
       default: 'user'
     }
 });

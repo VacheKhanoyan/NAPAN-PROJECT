@@ -4,12 +4,40 @@ const Utility = require('./../services/utility');
 const AppConstants = require('./../settings/constants');
 const UserValidator = require('./../services/validators/user-validator');
 const EmailValidator = require('./../services/validators/email-validator');
-//const ET = Utility.ErrorTypes;
+const ET = Utility.ErrorTypes;
 
 module.exports = function(app) {
+  function _auth(permission) {
+    return function (req, res, next){
+    if(permission == 'optional') {
+      return true;
+    }
+    if(permission == 'user') {
+      app.db.users.findOne({key: req.query.key}, (err,user) => {
+        if(!user) {
+          return res.send(Utility.generateErrorMessage(ET.PERMISSION_DENIED));
+        }
+        req.user = user;
+        return next();
+      });
 
-app.get('/api/users',(req, res) => {
-
+    if(permission == 'admin') {
+      app.db.users.findOne({key: req.query.key, role: 'admin'},(err,user) =>{
+        if(!user) {
+          return res.send(Utility.generateErrorMessage(ET.PERMISSION_DENIED));
+        }
+        req.user = user;
+        return next();
+      });
+     }
+   }
+ }
+}
+app.get('/api/users', _auth('user'),(req, res) => {
+ if(!req.query.key){
+   console.log(req.query.key);
+    return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.PERMISSION_DENIED))
+  }
   app.db.users.find().skip(req.query.offset)
       .limit(req.query.limit)
       .exec((err,data) => {
@@ -22,6 +50,7 @@ app.get('/api/users',(req, res) => {
             id: d._id,
             name: d.name,
             password: d.password,
+            //key: d.key,
             age: d.age,
             email: d.email
           }
@@ -29,7 +58,7 @@ app.get('/api/users',(req, res) => {
         return res.send(response);
       });
 });
-app.post('/api/users', (req, res) => {
+app.post('/api/users',_auth('optional'), (req, res) => {
   let username = req.body.username;
   let password = req.body.password;
   let name = req.body.name;
@@ -79,7 +108,12 @@ app.post('/api/users', (req, res) => {
       })
     });
 });
-app.put('/api/users/:id', (req,res)=>{
+app.put('/api/users/:id',_auth('user'), (req,res)=>{
+  if(req.user.role != 'admin') {
+  if(res.send.id != req.user._id) {
+    return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.PERMISSION_DENIED));
+  }
+  }
 let id = req.params.id;
 let user = {
   username : req.body.username,
@@ -99,8 +133,12 @@ if(!id){
     return res.send(data);
   });
 });
-app.delete('/api/users/:id',(req,res) => {
-
+app.delete('/api/users/:id', _auth('admin'),(req,res) => {
+  app.db.users.findOne({key: req.query.key, role:'admin'},(err, user)=> {
+    if(err || !user){
+    return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR))
+  }
+  })
         let id = req.params.id;
         if(!id) {
             return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR));
@@ -112,8 +150,11 @@ app.delete('/api/users/:id',(req,res) => {
            return res.send(data);
         })
     });
+
 }
-/*function _auth(permission) {
+
+/*
+************function _auth(permission) {
   return function (req, res, next){
   if(permission == 'optional') {
     return true;
@@ -138,12 +179,16 @@ app.delete('/api/users/:id',(req,res) => {
   }
 }
 }
+*************************
+*************
 _auth('user'),
 _auth('optional'),
 ,_auth('admin')
+*******************************
 if(!req.query.key){
 return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.PERMISSION_DENIED))
 }
+***************************
 console.log('req.query ==', req.query);
 if(req.user.role != 'admin') {
 if(res.send.id != req.user._id) {
@@ -151,7 +196,7 @@ if(res.send.id != req.user._id) {
 }
 }
   return true;
-
+***************************************
   app.db.users.findOne({key: req.query.key, role:'admin'},(err, user)=> {
     if(err || !user){
     return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR))
