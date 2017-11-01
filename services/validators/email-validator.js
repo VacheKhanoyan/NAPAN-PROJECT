@@ -10,3 +10,4 @@ class EmailValidator extends BaseValidator {
     return false;
 }
 }
+module.exports = EmailValidator;

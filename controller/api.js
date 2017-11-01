@@ -3,10 +3,13 @@ const crypto = require('crypto');
 const Utility = require('./../services/utility');
 const AppConstants = require('./../settings/constants');
 const UserValidator = require('./../services/validators/user-validator');
-const EmailValidator = require('./../services/validators/email-validator')
+const EmailValidator = require('./../services/validators/email-validator');
+//const ET = Utility.ErrorTypes;
+
 module.exports = function(app) {
+
 app.get('/api/users',(req, res) => {
-  console.log('req.query ==', req.query);
+
   app.db.users.find().skip(req.query.offset)
       .limit(req.query.limit)
       .exec((err,data) => {
@@ -17,7 +20,6 @@ app.get('/api/users',(req, res) => {
           return {
             username: d.username,
             id: d._id,
-            key: d.key,
             name: d.name,
             password: d.password,
             age: d.age,
@@ -77,69 +79,82 @@ app.post('/api/users', (req, res) => {
       })
     });
 });
-app.put('/api/users/:id',(req,res) => {
-
-        app.db.users.find({_id: req.params.id },(err,data) => {
-           if(err) {
-              return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR));
-           }
-           let user = {
-             username : req.body.username,
-             password : req.body.password,
-             name : req.body.name,
-             age : req.body.age,
-             email : req.body.email
-           }
-           user.username ? user.username = user.username : user.username = data.username;
-           user.password ? user.password = user.password : user.password = data.password;
-           user.name ? user.name = user.name : user.name = data.name;
-           user.age ? user.age = user.age : user.age = data.age;
-           user.email ? user.email = user.email : user.email = data.email;
-           let uv_response = UserValidator.validateUsername(user.username);
-
-           if (uv_response != Utility.ErrorTypes.SUCCESS) {
-                return res.send(Utility.generateErrorMessage(uv_response));
-            }
-            let pass_response = UserValidator.validateUsername(user.password);
-            if (pass_response != Utility.ErrorTypes.SUCCESS) {
-                 return res.send(Utility.generateErrorMessage(pass_response));
-             }
-           user.password = crypto.createHash('sha1').update(user.password + 'bootcamp').digest('hex');
-           app.db.users.update({_id:req.params.id},{$set:{username: user.username,
-                                                          name : user.name,
-                                                          age : user.age,
-                                                          email : user.email,
-                                                          password : user.password }},(err,value) => {
-              if(err) {
-                return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_UPDATE_ERROR));
-              }
-              return res.send(value);
-           });
-        });
-     });
-/*app.put('/api/users/:id', (req,res)=>{
+app.put('/api/users/:id', (req,res)=>{
 let id = req.params.id;
+let user = {
+  username : req.body.username,
+  password : req.body.password,
+  name : req.body.name,
+  age : req.body.age,
+  email : req.body.email
+}
 if(!id){
   return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR))
 }
-    app.db.users.update({},{$set: {_id: id}},(err,data)=>{
+  app.db.users.findByIdAndUpdate(id,{$set: req.body},(err,data)=>{
     if(err){
       return res.send('error');
     }
     console.log(data)
     return res.send(data);
   });
-});*/
+});
 app.delete('/api/users/:id',(req,res) => {
+
         let id = req.params.id;
         if(!id) {
             return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR));
         }
-        app.db.users.findOneAndRemove({_id:id} , (err,data)=> {
+        app.db.users.findOneAndRemove({_id:id}, (err,data)=> {
            if(err) {
               return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_DELETE_ERROR));
            }
            return res.send(data);
         })
     });
+}
+/*function _auth(permission) {
+  return function (req, res, next){
+  if(permission == 'optional') {
+    return true;
   }
+  if(permission == 'user') {
+    app.db.users.findOne({key: req.query.key}, (err,user) => {
+      if(!user) {
+        return res.send(Utility.generateErrorMessage(ET.PERMISSION_DENIED));
+      }
+      req.user = user;
+      return next();
+    });
+
+  if(permission == 'admin') {
+    app.db.users.findOne({key: req.query.key, role: 'admin'},(err,user) =>{
+      if(!user) {
+        return res.send(Utility.generateErrorMessage(ET.PERMISSION_DENIED));
+      }
+      req.user = user;
+      return next();
+    });
+  }
+}
+}
+_auth('user'),
+_auth('optional'),
+,_auth('admin')
+if(!req.query.key){
+return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.PERMISSION_DENIED))
+}
+console.log('req.query ==', req.query);
+if(req.user.role != 'admin') {
+if(res.send.id != req.user._id) {
+  return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.PERMISSION_DENIED));
+}
+}
+  return true;
+
+  app.db.users.findOne({key: req.query.key, role:'admin'},(err, user)=> {
+    if(err || !user){
+    return res.send(Utility.generateErrorMessage(Utility.ErrorTypes.USER_ID_ERROR))
+  }
+  })
+*/

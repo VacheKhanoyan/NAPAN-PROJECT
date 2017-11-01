@@ -45,6 +45,11 @@ let UsersSchema = Schema ({
         default: null,
         minlength: AppConstants.NAME_MIN_LENGTH,
         maxlength: AppConstants.NAME_MAX_LENGTH,
+    },
+    role: {
+      type: String,
+      enum:['user', 'admin'],
+      default: 'user'
     }
 });
 

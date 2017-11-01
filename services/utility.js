@@ -3,11 +3,16 @@ const AppConstants = require('./../settings/constants');
 const ErrorTypes = {
     SUCCESS: 'success',
     VALIDATION_ERROR: 'validation_error',
-    USERNAME_PASS_MISSING: 'username_password_missing',
+    USERNAME_MISSING: 'username_missing',
+    PASS_MISSING: 'password_missing',
     INVALID_USERNAME_RANGE: 'invalid_username_range',
     INVALID_PASSWORD_RANGE: 'invalid_password_range',
     USER_CREATION_ERROR: 'user_creation_error',
-    UNKNOWN_ERROR: 'unknown_error'
+    PERMISSION_DENIED: 'permission_denied',
+    UNKNOWN_ERROR: 'unknown_error',
+    USER_ID_ERROR: 'id_not_found',
+    USER_DELETE_ERROR: 'deleting_error',
+    USER_UPDATE_ERROR: 'updating_error'
 };
 
 class Utility {
@@ -30,8 +35,11 @@ class Utility {
             message: 'Something went wrong..'
         };
         switch (type) {
-            case ErrorTypes.USERNAME_PASS_MISSING:
-                error_object.message = 'Username or password is not specified.';
+            case ErrorTypes.USERNAME_MISSING:
+                error_object.message = 'Username  is not specified.';
+                break;
+            case ErrorTypes.PASS_MISSING:
+                error_object.message = 'password is not specified.';
                 break;
             case ErrorTypes.INVALID_USERNAME_RANGE:
                 error_object.message = 'Invalid min/max value for username, must be >= {min} and <= {max}, your value is: {val}'.replace('{min}', AppConstants.USERNAME_MIN_LENGTH)
@@ -43,10 +51,21 @@ class Utility {
             case ErrorTypes.USER_CREATION_ERROR:
                 error_object.message = 'Failed to create a user.';
                 break;
+            case ErrorTypes.USER_ID_ERROR:
+                  error_object.message = 'this id didn`t found.';
+                  break;
+            case ErrorTypes.USER_DELETE_ERROR:
+                  error_object.message = 'this user didn`t removed.';
+                  break;
+            case ErrorTypes.USER_UPDATE_ERROR:
+                  error_object.message = 'didn`t update.';
+                  break;
+            case ErrorTypes.PERMISSION_DENIED:
+                  error_object.message = 'you must be registered.';
+                  break;
         }
         return error_object;
     }
 }
-
 module.exports = Utility;
 module.exports.ErrorTypes = ErrorTypes;
