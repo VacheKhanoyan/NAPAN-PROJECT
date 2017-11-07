@@ -1,7 +1,6 @@
 {
   "name": "project111",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,5 +12,15 @@
     "express": "^4.16.2",
     "keygenerator": "^1.0.4",
     "mongoose": "^4.12.4"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VacheKhanoyan/NAPAN-PROJECT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/VacheKhanoyan/NAPAN-PROJECT/issues"
+  },
+  "homepage": "https://github.com/VacheKhanoyan/NAPAN-PROJECT#readme",
+  "description": ""
 }

@@ -3,7 +3,7 @@ const keygen = require('keygenerator');
 const Schema = mongoose.Schema;
 
 const AppConstants = require('./../settings/constants');
-const EmailValidator = require('./../services/validators/email-validator');
+//const EmailValidator = require('./../services/validators/email-validator');
 function generateAPIKey() {
   return (keygen._({ length: 2}) + '-' + keygen._({length: 6})
 + '-' + keygen.number()
@@ -32,7 +32,7 @@ let UsersSchema = Schema ({
         lowercase: true,
         minlength: AppConstants.EMAIL_MIN_LENGTH,
         maxlength: AppConstants.EMAIL_MAX_LENGTH,
-        validator: EmailValidator.isEmail
+        //validator: EmailValidator.isEmail
     },
     age: {
         type: Number,
