@@ -15,7 +15,10 @@ const ErrorTypes = {
   USER_DELETE_ERROR: 'deleting_error',
   USER_UPDATE_ERROR: 'updating_error',
   POST_CREATION_ERROR: 'post error',
-  BODY_SIZE_ERROR: 'invalid post size'
+  BODY_SIZE_ERROR: 'invalid post size',
+  EMPTY_PHOTO: 'no photo',
+  PHOTO_TYPE_ERROR: 'type error',
+  PHOTO_DELETE_ERROR: ' delete error',
 };
 
 class Utility {
@@ -75,6 +78,12 @@ class Utility {
       case ErrorTypes.BODY_SIZE_ERROR:
       error_object.message = 'posting size error.';
       break;
+      case ErrorTypes.EMPTY_PHOTO:
+      error_object.message = 'photo is empty';
+      case ErrorTypes.PHOTO_TYPE_ERROR:
+      error_object.message = 'wrong photos type';
+      case ErrorTypes.PHOTO_DELETE_ERROR:
+      error_object.message = 'dont delete, please try again';
     }
     return error_object;
   }
